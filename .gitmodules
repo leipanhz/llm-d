@@ -1,0 +1,3 @@
+[submodule "guides/precise-prefix-cache-aware/llm-d-modelservice"]
+	path = guides/precise-prefix-cache-aware/llm-d-modelservice
+	url = https://github.com/leipanhz/llm-d-modelservice.git
