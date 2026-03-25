@@ -9,8 +9,10 @@ inferenceExtension:
     # both downstream infernece-scheduler and upstream epp images can support precise KV Cache awareness based on the configurations here
     ###################
     name: llm-d-inference-scheduler
-    hub: ghcr.io/llm-d
-    tag: v0.5.0-rc.1
+    #hub: ghcr.io/llm-d
+    #tag: v0.5.0-rc.1
+    hub: icr.io/kvc-storage
+    tag: debug-v0.5.0.afm.n1-mapping  # n:1 mapping
     ###################
     # name: epp
     # hub: registry.k8s.io/gateway-api-inference-extension
@@ -49,7 +51,8 @@ inferenceExtension:
               blockSize: 64
             indexerConfig:
               tokenizersPoolConfig:
-                modelName: "Qwen/Qwen3-32B"
+                minPrefixOverlapRatio: 1.0    # Force full tokenization
+                modelName: "Qwen/Qwen3-0.6B"
                 hf:
                   tokenizersCacheDir: "/tmp/tokenizers"
             kvEventsConfig:
@@ -60,6 +63,26 @@ inferenceExtension:
         - type: kv-cache-utilization-scorer
         - type: queue-scorer
         - type: max-score-picker
+        - type: prefetch-prerequest-handler
+          parameters:
+            engineKeysProviderPluginName: "precise-prefix-cache-scorer"
+            kvFilePathBase:
+              rootDir: /mnt/kv-cache-storage
+              modelParentDir: Qwen
+              modelName: Qwen3-0.6B
+              gpuBlockSize: 64
+              gpuBlocksPerFile: 8
+              tpSize: 1
+              ppSize: 1
+              pcpSize: 1
+              dtype: auto
+            prefetchConfig:
+              enabled: true
+              blockSize: 4194304           # 4 MiB
+              blockCount: 3                # 3 blocks = 12 MiB per file
+              maxConcurrentFiles: 16       # 16 workers = 192 MiB total memory
+              workQueueSize: 256           # Work queue buffer size (default: 256)
+              queueTimeout: 0              # Optional: timeout in ms for queue send (0 = blocking, >0 = timeout)
       schedulingProfiles:
         - name: default
           plugins:
@@ -89,3 +112,5 @@ inferencePool:
   modelServers:
     matchLabels:
       llm-d.ai/inferenceServing: "true"
+      #llm-d.ai/inference-serving: "true"
+      #llm-d.ai/guide: "precise-prefix-cache-aware"

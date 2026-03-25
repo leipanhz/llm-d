@@ -1,8 +1,9 @@
 multinode: false
 
 modelArtifacts:
-  uri: "hf://Qwen/Qwen3-32B"
-  name: "Qwen/Qwen3-32B"
+  #uri: "hf://Qwen/Qwen3-32B"
+  uri: "hf://Qwen/Qwen3-0.6B"
+  name: "Qwen/Qwen3-0.6B"
   size: 80Gi
   authSecretName: "llm-d-hf-token"
 
@@ -16,9 +17,9 @@ accelerator:  # controls specialized hardware Type
 decode:
   create: true
   parallelism:
-    tensor: 2
+    tensor: 1
     data: 1
-  replicas: 8
+  replicas: 1
   monitoring:
     podmonitor:
       enabled: true
@@ -27,20 +28,22 @@ decode:
       interval: "30s"
   containers:
     - name: "vllm"
-      image: vllm/vllm-openai:v0.14.1-cu130
-      modelCommand: vllmServe
+      image: quay.io/kfirt/vllm-offloading:storage-v0.14.1
+      modelCommand: custom
+      command:
+        - /bin/sh
+        - '-c'
       args:
-        - "--block-size=64"
-        - "--kv-events-config"
-        - |-
-          {
-            "enable_kv_cache_events": true,
-            "publisher": "zmq",
-            "endpoint": "tcp://gaie-$(GAIE_RELEASE_NAME_POSTFIX)-epp.$(NAMESPACE).svc.cluster.local:5557",
-            "topic": "kv@$(POD_IP)@Qwen/Qwen3-32B"
-          }
-        - "--disable-uvicorn-access-log"
-        - "--gpu-memory-utilization=0.95"
+        - |
+          set -x
+          exec vllm serve Qwen/Qwen3-0.6B \
+            --port 8000 \
+            --served-model-name "Qwen/Qwen3-0.6B" \
+            --block-size 64 \
+            --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-0.6B\"}" \
+            --disable-uvicorn-access-log \
+            --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"SharedStorageOffloadingSpec","spec_module_path":"llmd_fs_backend.spec","shared_storage_path":"/mnt/kv-cache-storage/","block_size":512,"threads_per_gpu":"64"}}' \
+            --gpu-memory-utilization=0.95
       env:
         - name: GAIE_RELEASE_NAME_POSTFIX  # index 0 matters because of set in helmfile
         - name: NAMESPACE
