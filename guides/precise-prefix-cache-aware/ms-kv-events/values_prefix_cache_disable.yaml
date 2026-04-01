@@ -40,10 +40,9 @@ decode:
             --port 8000 \
             --served-model-name "Qwen/Qwen3-0.6B" \
             --block-size 64 \
+            --no-enable-prefix-caching \
             --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-0.6B\"}" \
             --disable-uvicorn-access-log \
-            --kv-cache-memory-bytes 2147483648 \
-            --max-model-len 18688 \
             --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"SharedStorageOffloadingSpec","spec_module_path":"llmd_fs_backend.spec","shared_storage_path":"/mnt/kv-cache-storage/","block_size":512,"threads_per_gpu":"64"}}' \
             --gpu-memory-utilization=0.95
       env:
@@ -57,8 +56,6 @@ decode:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        - name: STORAGE_CONNECTOR_DEBUG
-          value: "1"
         - name: VLLM_LOGGING_LEVEL
           value: DEBUG
         - name: TRITON_CACHE_DIR

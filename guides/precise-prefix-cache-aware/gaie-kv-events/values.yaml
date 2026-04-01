@@ -12,7 +12,7 @@ inferenceExtension:
     #hub: ghcr.io/llm-d
     #tag: v0.5.0-rc.1
     hub: icr.io/kvc-storage
-    tag: debug-v0.5.0.afm.n1-mapping  # n:1 mapping
+    tag: lp-built # debug-v0.5.0.afm.n1-mapping  # n:1 mapping
     ###################
     # name: epp
     # hub: registry.k8s.io/gateway-api-inference-extension
