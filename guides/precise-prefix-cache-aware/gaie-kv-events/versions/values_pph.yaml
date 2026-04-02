@@ -52,7 +52,7 @@ inferenceExtension:
             indexerConfig:
               tokenizersPoolConfig:
                 minPrefixOverlapRatio: 1.0    # Force full tokenization
-                modelName: "Qwen/Qwen3-0.6B"
+                modelName: "Qwen/Qwen3-8B"
                 hf:
                   tokenizersCacheDir: "/tmp/tokenizers"
             kvEventsConfig:
@@ -69,7 +69,7 @@ inferenceExtension:
             kvFilePathBase:
               rootDir: /mnt/kv-cache-storage
               modelParentDir: Qwen
-              modelName: Qwen3-0.6B
+              modelName: Qwen3-8B
               gpuBlockSize: 64
               gpuBlocksPerFile: 8
               tpSize: 1

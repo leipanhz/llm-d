@@ -52,7 +52,7 @@ inferenceExtension:
             indexerConfig:
               tokenizersPoolConfig:
                 minPrefixOverlapRatio: 1.0    # Force full tokenization
-                modelName: "Qwen/Qwen3-0.6B"
+                modelName: "Qwen/Qwen3-8B"
                 hf:
                   tokenizersCacheDir: "/tmp/tokenizers"
             kvEventsConfig:

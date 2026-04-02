@@ -2,8 +2,8 @@ multinode: false
 
 modelArtifacts:
   #uri: "hf://Qwen/Qwen3-32B"
-  uri: "hf://Qwen/Qwen3-0.6B"
-  name: "Qwen/Qwen3-0.6B"
+  uri: "hf://Qwen/Qwen3-8B"
+  name: "Qwen/Qwen3-8B"
   size: 80Gi
   authSecretName: "llm-d-hf-token"
 
@@ -36,12 +36,12 @@ decode:
       args:
         - |
           set -x
-          exec vllm serve Qwen/Qwen3-0.6B \
+          exec vllm serve Qwen/Qwen3-8B \
             --port 8000 \
-            --served-model-name "Qwen/Qwen3-0.6B" \
+            --served-model-name "Qwen/Qwen3-8B" \
             --block-size 64 \
             --no-enable-prefix-caching \
-            --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-0.6B\"}" \
+            --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-8B\"}" \
             --disable-uvicorn-access-log \
             #--kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"SharedStorageOffloadingSpec","spec_module_path":"llmd_fs_backend.spec","shared_storage_path":"/mnt/kv-cache-storage/","block_size":512,"threads_per_gpu":"64"}}' \
             --gpu-memory-utilization=0.95

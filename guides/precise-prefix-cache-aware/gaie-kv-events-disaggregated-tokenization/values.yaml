@@ -63,7 +63,7 @@ inferenceExtension:
               hashSeed: "42"
             indexerConfig:
               tokenizersPoolConfig:
-                modelName: Qwen/Qwen3-0.6B
+                modelName: Qwen/Qwen3-8B
                 local: null
                 hf: null
                 uds:
