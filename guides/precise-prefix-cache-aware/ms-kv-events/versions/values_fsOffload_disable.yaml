@@ -40,7 +40,7 @@ decode:
             --port 8000 \
             --served-model-name "Qwen/Qwen3-8B" \
             --block-size 64 \
-            --no-enable-prefix-caching \
+            --enable-prefix-caching \
             --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-8B\"}" \
             --disable-uvicorn-access-log \
             --gpu-memory-utilization=0.95
