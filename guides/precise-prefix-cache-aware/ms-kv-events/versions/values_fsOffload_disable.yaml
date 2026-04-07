@@ -121,7 +121,7 @@ decode:
       emptyDir: {}
     - name: kvc-path
       persistentVolumeClaim:
-        claimName: afm-pvc-lp
+        claimName: afm-pvc-n3
 
 # PD disabled in this example
 prefill:
