@@ -63,6 +63,26 @@ inferenceExtension:
         - type: kv-cache-utilization-scorer
         - type: queue-scorer
         - type: max-score-picker
+        - type: prefetch-prerequest-handler
+          parameters:
+            engineKeysProviderPluginName: "precise-prefix-cache-scorer"
+            kvFilePathBase:
+              rootDir: /mnt/kv-cache-storage
+              modelParentDir: Qwen
+              modelName: Qwen3-8B
+              gpuBlockSize: 64
+              gpuBlocksPerFile: 8
+              tpSize: 1
+              ppSize: 1
+              pcpSize: 1
+              dtype: auto
+            prefetchConfig:
+              enabled: true
+              blockSize: 4194304           # 4 MiB
+              blockCount: 3                # 3 blocks = 12 MiB per file
+              maxConcurrentFiles: 16       # 16 workers = 192 MiB total memory
+              workQueueSize: 256           # Work queue buffer size (default: 256)
+              queueTimeout: 0              # Optional: timeout in ms for queue send (0 = blocking, >0 = timeout)
       schedulingProfiles:
         - name: default
           plugins:

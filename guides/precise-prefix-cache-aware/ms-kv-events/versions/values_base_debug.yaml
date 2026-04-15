@@ -44,7 +44,8 @@ decode:
             --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-8B\"}" \
             --disable-uvicorn-access-log \
             --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"SharedStorageOffloadingSpec","spec_module_path":"llmd_fs_backend.spec","shared_storage_path":"/mnt/kv-cache-storage/","block_size":512,"threads_per_gpu":"64"}}' \
-            --gpu-memory-utilization=0.95
+            --max-num-seqs 1 \
+            --gpu-memory-utilization=0.5
       env:
         - name: GAIE_RELEASE_NAME_POSTFIX  # index 0 matters because of set in helmfile
         - name: NAMESPACE
@@ -62,6 +63,8 @@ decode:
           value: DEBUG
         - name: TRITON_CACHE_DIR
           value: /.triton-cache
+        - name: VLLM_SERVER_DEV_MODE
+          value: "1"
       ports:
         - containerPort: 8000
           name: vllm
