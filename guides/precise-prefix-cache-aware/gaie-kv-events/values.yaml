@@ -105,6 +105,19 @@ inferenceExtension:
       auth:
         # To allow unauthenticated /metrics access (e.g., for debugging with curl), set to false
         enabled: true
+
+  serviceAccount:
+    imagePullSecrets:
+      - name: lpsecret
+
+  extraVolumeMounts:
+    - name: scale-data-pvc
+      mountPath: /mnt/kv-cache-storage
+
+  extraVolumes:
+    - name: scale-data-pvc
+      persistentVolumeClaim:
+        claimName: afm-pvc-n3
 inferencePool:
   targetPorts:
     - number: 8000
