@@ -93,8 +93,8 @@ inferenceExtension:
             tokenProcessorConfig:
               blockSize: 64
               speculativeIndexing: true   # v0.5.1 addition
-              hashAlgorithm: sha256_cbor # fnv64a_cbor
-              hashSeed: "10"  
+                #hashAlgorithm: fnv64a_cbor #sha256_cbor # fnv64a_cbor
+                #hashSeed: "10"
               blockSizeTokens: 64 # 16
             indexerConfig:
               tokenizersPoolConfig:
@@ -117,28 +117,6 @@ inferenceExtension:
 
         # --- picker ---
         - type: max-score-picker
-
-        # --- prefetch (your custom plugin, preserved) ---
-        - type: prefetch-prerequest-handler
-          parameters:
-            engineKeysProviderPluginName: "precise-prefix-cache-scorer"
-            kvFilePathBase:
-              rootDir: /mnt/kv-cache-storage
-              modelParentDir: Qwen
-              modelName: Qwen3-8B
-              gpuBlockSize: 64
-              gpuBlocksPerFile: 8
-              tpSize: 1
-              ppSize: 1
-              pcpSize: 1
-              dtype: auto
-            prefetchConfig:
-              enabled: true
-              blockSize: 4194304
-              blockCount: 3
-              maxConcurrentFiles: 16
-              workQueueSize: 256
-              queueTimeout: 0
 
       # v0.5.1: dataLayer wires data sources → extractors
       dataLayer:
