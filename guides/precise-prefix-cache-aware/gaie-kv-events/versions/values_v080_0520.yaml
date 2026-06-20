@@ -1,7 +1,7 @@
 inferenceExtension:
   replicas: 1
   flags:
-    v: 4 #log verbosity: 5(trace), 4(debug) 
+    v: 5 #4  # log verbosity
     # NOTE: kv-cache-usage-percentage-metric removed — deprecated in v0.5.1+
     # Configure metrics via engineConfigs/EndpointPickerConfig instead.
     # ha-enable-leader-election is a no-op at replicas=1 but kept for forward compat
@@ -10,7 +10,7 @@ inferenceExtension:
   image:
     name: llm-d-router-endpoint-picker
     hub: icr.io/kvc-storage
-    tag: debug-pph-kvfilepath-0618
+    tag: debug-pph-kvfilepath
     pullPolicy: Always
 
   extProcPort: 9002
@@ -74,8 +74,8 @@ inferenceExtension:
         - type: token-producer #tokenizer
           parameters:
             modelName: Qwen/Qwen3-8B
-            vllm:
-              url: "http://gaie-kv-events-ip-805c964d.lpkvc.svc.cluster.local:8000"
+            udsTokenizerConfig:
+              socketFile: /tmp/tokenizer/tokenizer-uds.socket
 
         - type: endpoint-notification-source
 
@@ -87,34 +87,33 @@ inferenceExtension:
         - type: single-profile-handler
         - type: decode-filter
 
-        # --- precise prefix cache: producer + scorer (official structure; replaces deprecated precise-prefix-cache-scorer) ---
-        - type: precise-prefix-cache-producer
+        # --- scorers ---
+        - type: precise-prefix-cache-scorer
           parameters:
             tokenProcessorConfig:
               blockSize: 64
-              hashAlgorithm: sha256_cbor   # must match vLLM --prefix-caching-hash-algo
-              hashSeed: "10"               # must match vLLM PYTHONHASHSEED
-              blockSizeTokens: 64          # must match vLLM --block-size
-            speculativeIndexing: true
+              speculativeIndexing: true   # v0.5.1 addition
+              hashAlgorithm: sha256_cbor # fnv64a_cbor
+              hashSeed: "10"  
+              blockSizeTokens: 64 # 16
             indexerConfig:
-              # tokenizersPoolConfig omitted: producer is tokens-only; tokens come from token-producer above
+              tokenizersPoolConfig:
+                modelName: Qwen/Qwen3-8B
+                workersCount: 24          # v0.5.1 addition
+                uds:
+                  enabled: true
+                  socketFile: /tmp/tokenizer/tokenizer-uds.socket
               kvBlockIndexConfig:
-                enableMetrics: true
+                enableMetrics: true       # v0.5.1 addition
             kvEventsConfig:
               topicFilter: "kv@"
               concurrency: 4
-              discoverPods: false          # static push: vLLM publishes to this EPP zmqEndpoint
+              discoverPods: false         # kept: using static zmqEndpoint below
               zmqEndpoint: "tcp://*:5557"
-
-        - type: prefix-cache-scorer
-          parameters:
-            prefixMatchInfoProducerName: precise-prefix-cache-producer
 
         - type: kv-cache-utilization-scorer
         - type: queue-scorer
-        - type: no-hit-lru-scorer
-          parameters:
-            prefixMatchInfoProducerName: precise-prefix-cache-producer
+        - type: no-hit-lru-scorer         # v0.5.1 addition
 
         # --- picker ---
         - type: max-score-picker
@@ -122,12 +121,10 @@ inferenceExtension:
         # --- prefetch (your custom plugin, preserved) ---
         - type: prefetch-prerequest-handler
           parameters:
-            engineKeysProviderPluginName: "precise-prefix-cache-producer"
+            engineKeysProviderPluginName: "precise-prefix-cache-scorer"
             kvFilePathBase:
               rootDir: /mnt/kv-cache-storage
               modelName: Qwen/Qwen3-8B
-              digest: "07d7b166f256"
-              groupIdx: 0
               gpuBlocksPerFile: 8
               tpSize: 1
               ppSize: 1
@@ -149,13 +146,13 @@ inferenceExtension:
               - pluginRef: core-metrics-extractor
           - pluginRef: endpoint-notification-source
             extractors:
-              - pluginRef: precise-prefix-cache-producer
+              - pluginRef: precise-prefix-cache-scorer
 
       schedulingProfiles:
         - name: default
           plugins:
             - pluginRef: decode-filter            # v0.5.1 addition
-            - pluginRef: prefix-cache-scorer
+            - pluginRef: precise-prefix-cache-scorer
               weight: 3.0
             - pluginRef: kv-cache-utilization-scorer
               weight: 2.0
