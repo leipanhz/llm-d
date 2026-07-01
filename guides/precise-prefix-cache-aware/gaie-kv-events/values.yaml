@@ -10,7 +10,7 @@ inferenceExtension:
   image:
     name: llm-d-router-endpoint-picker
     hub: icr.io/kvc-storage
-    tag: debug-pph-kvfilepath-0618
+    tag: debug-pph-lp #debug-pph-kvfilepath-0618
     pullPolicy: Always
 
   extProcPort: 9002

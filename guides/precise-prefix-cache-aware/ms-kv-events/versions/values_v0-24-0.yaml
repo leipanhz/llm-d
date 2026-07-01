@@ -45,7 +45,7 @@ decode:
             --prefix-caching-hash-algo sha256_cbor \
             --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-8B\"}" \
             --disable-uvicorn-access-log \
-            --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"TieringOffloadingSpec","cpu_bytes_to_use":10737418240,"block_size":512,"secondary_tiers":[{"type":"fs","root_dir":"/mnt/kv-cache-storage/","n_read_threads":64,"n_write_threads":64}]}}' \
+            --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"TieringOffloadingSpec","cpu_bytes_to_use":42949672960,"block_size":512,"secondary_tiers":[{"type":"fs","root_dir":"/mnt/kv-cache-storage/","n_read_threads":64,"n_write_threads":64}]}}' \
             --max-num-seqs 1 \
             --gpu-memory-utilization=0.5
       env:
