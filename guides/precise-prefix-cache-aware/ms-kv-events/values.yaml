@@ -36,7 +36,7 @@ decode:
       args:
         - |
           set -x
-          printf '%s\n' '{"version":1,"disable_existing_loggers":false,"formatters":{"vllm":{"class":"vllm.logging_utils.NewLineFormatter","datefmt":"%m-%d %H:%M:%S","format":"%(levelname)s %(asctime)s [%(fileinfo)s:%(lineno)d] %(message)s"}},"handlers":{"vllm":{"class":"logging.StreamHandler","formatter":"vllm","level":"DEBUG","stream":"ext://sys.stdout"}},"loggers":{"vllm":{"handlers":["vllm"],"level":"INFO","propagate":false},"vllm.v1.kv_offload":{"level":"DEBUG"},"vllm.distributed.kv_transfer":{"level":"DEBUG"}}}' > /.config/vllm-logging.json
+          #printf '%s\n' '{"version":1,"disable_existing_loggers":false,"formatters":{"vllm":{"class":"vllm.logging_utils.NewLineFormatter","datefmt":"%m-%d %H:%M:%S","format":"%(levelname)s %(asctime)s [%(fileinfo)s:%(lineno)d] %(message)s"}},"handlers":{"vllm":{"class":"logging.StreamHandler","formatter":"vllm","level":"DEBUG","stream":"ext://sys.stdout"}},"loggers":{"vllm":{"handlers":["vllm"],"level":"INFO","propagate":false},"vllm.v1.kv_offload":{"level":"DEBUG"},"vllm.distributed.kv_transfer":{"level":"DEBUG"}}}' > /.config/vllm-logging.json
           exec vllm serve Qwen/Qwen3-8B \
             --port 8000 \
             --served-model-name "Qwen/Qwen3-8B" \
@@ -45,7 +45,7 @@ decode:
             --prefix-caching-hash-algo sha256_cbor \
             --kv-events-config "{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://gaie-${GAIE_RELEASE_NAME_POSTFIX}-epp.${NAMESPACE}.svc.cluster.local:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-8B\"}" \
             --disable-uvicorn-access-log \
-            --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"TieringOffloadingSpec","cpu_bytes_to_use":10737418240,"block_size":512,"secondary_tiers":[{"type":"fs","root_dir":"/mnt/kv-cache-storage/","n_read_threads":64,"n_write_threads":64}]}}' \
+            --kv-transfer-config '{"kv_connector":"OffloadingConnector","kv_role":"kv_both","kv_connector_extra_config":{"spec_name":"TieringOffloadingSpec","cpu_bytes_to_use":21474836480,"block_size":512,"secondary_tiers":[{"type":"fs","root_dir":"/mnt/kv-cache-storage/","n_read_threads":64,"n_write_threads":64}]}}' \
             --max-num-seqs 1 \
             --gpu-memory-utilization=0.5
       env:
@@ -62,9 +62,9 @@ decode:
               apiVersion: v1
               fieldPath: status.podIP
         - name: VLLM_LOGGING_LEVEL
-          value: INFO
-        - name: VLLM_LOGGING_CONFIG_PATH
-          value: /.config/vllm-logging.json
+          value: DEBUG #INFO
+        #- name: VLLM_LOGGING_CONFIG_PATH
+          #value: /.config/vllm-logging.json
         - name: TRITON_CACHE_DIR
           value: /.triton-cache
         - name: VLLM_SERVER_DEV_MODE
